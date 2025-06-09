@@ -24,3 +24,14 @@ pytest>=7.0.0
 pytest-asyncio>=0.21.0
 pytest-cov>=4.1.0
 
+# Pandas - for data manipulation and analysis
+pandas
+
+# Plotly - for interactive visualizations (pie chart, bar chart)
+plotly
+
+# python-dotenv - to load environment variables from .env file
+python-dotenv
+
+# google-generativeai - to interact with Gemini (Google's generative AI models)
+google-generativeai
