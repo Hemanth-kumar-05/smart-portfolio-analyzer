@@ -15,6 +15,7 @@ class PortfolioPrompts:
         Returns:
             Formatted prompt string for Gemini API
         """
+        allocations = '\n'.join([f'- {asset}: {percentage}%' for asset, percentage in portfolio.items()])
         return f"""You are an expert financial advisor analyzing an investment portfolio.
 
 Client Profile:
@@ -23,21 +24,21 @@ Client Profile:
 - Investment Goal: {profile['investment_goal']}
 
 Current Portfolio Allocation:
-{'\n'.join([f'- {asset}: {percentage}%' for asset, percentage in portfolio.items()])}
+{allocations}
 
 Provide a structured analysis in JSON format with the following sections:
 {{
-    "risk_score": <number between 1-100>,
-    "risk_assessment": <brief evaluation of portfolio risk level>,
-    "diversification_analysis": <analysis of portfolio diversification>,
-    "goal_alignment": <how well portfolio matches client goals>,
+    "risk_score": "<number between 1-100>",
+    "risk_assessment": "<brief evaluation of portfolio risk level>",
+    "diversification_analysis": "<analysis of portfolio diversification>",
+    "goal_alignment": "<how well portfolio matches client goals>",
     "recommendations": [
-        <list of specific rebalancing recommendations>
+        "<list of specific rebalancing recommendations>"
     ],
     "suggested_allocation": {{
-        <recommended percentage for each asset class>
+        "<asset_name>": "<percentage>"
     }},
-    "summary": <one-line summary of key findings>
+    "summary": "<one-line summary of key findings>"
 }}"""
 
     @staticmethod
@@ -49,34 +50,37 @@ Provide a structured analysis in JSON format with the following sections:
 - Investment Goal: {profile['investment_goal']}
 
 Provide a risk assessment score and explanation in JSON format:
-{{
-    "base_risk_score": <number between 1-100>,
-    "explanation": <brief explanation of the score>,
-    "recommended_asset_mix": {{
-        <recommended percentage ranges for different asset classes>
-    }}
-}}"""
+{
+    "base_risk_score": "<number between 1-100>",
+    "explanation": "<brief explanation of the score>",
+    "recommended_asset_mix": {
+        "<asset_class>": "<percentage_range>"
+    }
+}"""
 
     @staticmethod
     def get_rebalancing_prompt(current_allocation: Dict[str, float], 
                              risk_score: float, 
                              profile: Dict[str, Any]) -> str:
         """Generate a prompt for portfolio rebalancing suggestions."""
+        allocation_items = [f'{asset}: {percentage}%' for asset, percentage in current_allocation.items()]
+        if not allocation_items:
+            allocation_items = ["No assets in portfolio"]
         return f"""For an investor with:
 - Risk Score: {risk_score}/100
 - Age: {profile['age']}
 - Goal: {profile['investment_goal']}
 
 Current Portfolio:
-{'\n'.join([f'- {asset}: {percentage}%' for asset, percentage in current_allocation.items()])}
+{', '.join(allocation_items)}
 
 Provide rebalancing recommendations in JSON format:
-{{
+{
     "suggestions": [
-        <specific actions to take>
+        "<specific action to take>"
     ],
-    "target_allocation": {{
-        <target percentage for each asset>
-    }},
-    "rationale": <brief explanation of recommendations>
-}}"""
+    "target_allocation": {
+        "<asset_name>": "<target_percentage>"
+    },
+    "rationale": "<brief explanation of recommendations>"
+}"""
